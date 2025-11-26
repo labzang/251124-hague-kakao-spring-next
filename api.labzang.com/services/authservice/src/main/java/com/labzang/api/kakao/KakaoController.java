@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/auth/kakao")
+@RequestMapping("/kakao")
 public class KakaoController {
 
     @GetMapping("/callback")

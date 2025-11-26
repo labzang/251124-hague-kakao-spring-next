@@ -17,21 +17,40 @@ export default function Home() {
   };
 
   async function callGateway() {
-    const res = await fetch("http://localhost:8080/api/auth/kakao/login", {
-      method: "POST",
-      credentials: "include", // 쿠키를 쓰면 필요
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}), // 빈 객체 전송 (required = false이므로)
-    });
+    // Next.js API 라우트를 통해 프록시 (CORS 문제 해결)
+    const apiUrl = "http://localhost:8080/api/auth/kakao/login";
 
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+    try {
+      console.log("API 호출 시작:", apiUrl);
+
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({}), // 빈 객체 전송 (required = false이므로)
+      });
+
+      console.log("응답 상태:", res.status, res.statusText);
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: "알 수 없는 오류" }));
+        const errorMessage = errorData.error || `HTTP ${res.status} ${res.statusText}`;
+        console.error("API 에러:", errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      const data = await res.json();
+      console.log("API 응답 성공:", data);
+      return data;
+    } catch (error) {
+      console.error("API 호출 실패:", error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("알 수 없는 오류가 발생했습니다.");
     }
-
-    const data = await res.json();
-    return data;
   }
 
   const handleNaverLogin = () => {
@@ -76,7 +95,7 @@ export default function Home() {
           </button>
           <button
             onClick={handleKakaoLogin}
-            className="flex h-14 w-full items-center justify-center gap-3 rounded-lg bg-[#FEE500] px-6 text-base font-medium text-gray-900 transition-colors hover:bg-[#FDD835]"
+            className="flex h-14 w-full items-center justify-center gap-3 rounded-lg bg-[#FEE500] px-6 text-base font-medium text-gray-900 transition-colors hover:bg-[#FDD835] cursor-pointer"
           >
             <svg
               className="h-5 w-5"

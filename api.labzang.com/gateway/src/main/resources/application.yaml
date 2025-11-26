@@ -3,52 +3,43 @@ spring:
     name: gateway
   config:
     import: "optional:configserver:"
-  autoconfigure:
-    exclude:
-      - org.springframework.cloud.autoconfigure.LifecycleMvcEndpointAutoConfiguration
-      - org.springframework.cloud.autoconfigure.RefreshAutoConfiguration
-      - org.springframework.boot.actuate.autoconfigure.web.servlet.ServletManagementContextAutoConfiguration
-      - org.springframework.cloud.gateway.config.GatewayRedisAutoConfiguration
-      - org.springframework.cloud.client.discovery.simple.reactive.SimpleReactiveDiscoveryClientAutoConfiguration
-      - org.springframework.cloud.client.discovery.composite.reactive.ReactiveCompositeDiscoveryClientAutoConfiguration
   cloud:
-    discovery:
-      enabled: true
-    loadbalancer:
-      enabled: true
+    config:
+      enabled: false
+      import-check:
+        enabled: false
     gateway:
-      server:
-        webflux:
-          routes:
-            - id: auth-service
-              uri: lb://auth-service
-              predicates:
-                - Path=/api/auth/**
-              filters:
-                - RewritePath=/api/(?<segment>.*), /${segment}
-          discovery:
-            locator:
-              enabled: true
-              lower-case-service-id: true
-          globalcors:
-            cors-configurations:
-              '[/**]':
-                allowed-origins:
-                  - "http://localhost:3000"
-                  - "http://127.0.0.1:3000"
-                allowed-methods:
-                  - GET
-                  - POST
-                  - PUT
-                  - DELETE
-                  - OPTIONS
-                  - PATCH
-                allowed-headers: "*"
-                allow-credentials: true
-                max-age: 3600
+      routes:
+        - id: auth-service-route
+          uri: http://authservice:8081
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /${segment}
 
-server:
-  port: 8080
+        - id: user-service-route
+          uri: http://userservice:8082
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - RewritePath=/api/users/(?<segment>.*), /${segment}
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - "http://localhost:3000"
+              - "http://127.0.0.1:3000"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
 
 springdoc:
   api-docs:
@@ -58,14 +49,11 @@ springdoc:
     enabled: true
     operations-sorter: method
     tags-sorter: alpha
-    try-it-out-enabled: true
     use-root-path: false
+    persist-authorization: true
   show-actuator: false
-  paths-to-match:
-    - /**
+  default-flat-param-object: true
+  writer-with-order-by-keys: true
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
+server:
+  port: 8080

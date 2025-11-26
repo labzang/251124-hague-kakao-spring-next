@@ -1,7 +1,4 @@
 services:
-  # Eureka Server - Service Discovery
-
-
   # Discovery Server (API Gateway)
   gateway:
     build:
@@ -12,6 +9,8 @@ services:
       - "8080:8080"
     networks:
       - spring-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
 
   authservice:
     build:
@@ -22,6 +21,8 @@ services:
       - "8081:8081"
     networks:
       - spring-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
 
   # User Service
   userservice:
@@ -33,6 +34,8 @@ services:
       - "8082:8082"
     networks:
       - spring-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
 
 networks:
   spring-network:
