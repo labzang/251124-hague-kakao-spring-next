@@ -2,7 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import re
+import sys
+import io
 from urllib.parse import urljoin
+
+# Windows 콘솔 인코딩 문제 해결
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 def crawl_bugs_chart():
     """
